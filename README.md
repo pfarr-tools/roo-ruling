@@ -8,7 +8,7 @@ Das Paket bildet insbesondere die in der Grundschule verwendeten Schreiblineatur
 
 ```bash
 composer require pfarr-tools/roo-ruling
-````
+```
 
 Voraussetzung ist PHP 8.3 oder neuer.
 
@@ -91,39 +91,35 @@ Text steht auf dieser Linie
 
 ## Verwendung
 
-Eine Lineatur kann über ein Preset ausgewählt und anschließend mit dem PHPWord-Renderer in einen Abschnitt eingefügt werden.
+In einem eigenen Projekt wird zunächst ein PHPWord-Abschnitt angelegt. Ein Preset liefert die Geometrie als `RulingDefinition`; der Renderer fügt daraus eine native Tabelle mit exakten Zeilenhöhen und Rahmenlinien ein.
 
 ```php
+use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\PhpWord;
 use PfarrTools\RooRuling\RulingPreset;
 use PfarrTools\RooRuling\PhpWord\RulingRenderer;
 
-$ruling = RulingPreset::Grade1->ruling();
+$phpWord = new PhpWord();
+$section = $phpWord->addSection();
 
-$renderer = new RulingRenderer();
-
-$renderer->add(
+$preset = RulingPreset::Grade1;
+(new RulingRenderer())->render(
     section: $section,
-    ruling: $ruling,
+    ruling: $preset->definition(),
     count: 5,
+    widthMm: 170.0,
 );
+
+IOFactory::createWriter($phpWord, 'Word2007')->save(__DIR__.'/ruling.docx');
 ```
 
-Für Klasse 2:
+`widthMm` und alle Maße der Definition werden in Millimetern angegeben. Die vier verfügbaren Presets sind:
 
 ```php
-$ruling = RulingPreset::Grade2->ruling();
-```
-
-Für Klasse 3:
-
-```php
-$ruling = RulingPreset::Grade3->ruling();
-```
-
-Für Klasse 4 und höher:
-
-```php
-$ruling = RulingPreset::Grade4Plus->ruling();
+RulingPreset::Grade1;
+RulingPreset::Grade2;
+RulingPreset::Grade3;
+RulingPreset::Grade4Plus;
 ```
 
 ## Text auf der Lineatur
@@ -135,11 +131,12 @@ Dadurch kann Text direkt in die Lineatur eingefügt werden.
 Beispiel:
 
 ```php
-$renderer->add(
+(new RulingRenderer())->render(
     section: $section,
-    ruling: RulingPreset::Grade1->ruling(),
+    ruling: RulingPreset::Grade1->definition(),
     count: 3,
-    text: [
+    widthMm: 170.0,
+    textByBand: [
         'Gott spricht zu Abraham.',
         'Abraham macht sich auf den Weg.',
         'Gott begleitet ihn.',
@@ -148,19 +145,6 @@ $renderer->add(
 ```
 
 Damit können beispielsweise Arbeitsblätter mit vorgeschriebenen Wörtern oder Sätzen erzeugt werden.
-
-## Ganze Seiten erzeugen
-
-Für reine Schreibblätter kann eine Seite mit einer Lineatur gefüllt werden:
-
-```php
-$renderer->fillPage(
-    section: $section,
-    ruling: RulingPreset::Grade1->ruling(),
-);
-```
-
-Die Anzahl der Schreibzeilen bzw. Schreibbänder richtet sich nach der verwendeten Lineatur und der verfügbaren Seitenhöhe.
 
 ## DOCX und ODT
 
@@ -171,7 +155,27 @@ Das Paket ist für beide von PHPWord unterstützten Ausgabeformate vorgesehen:
 
 Die Lineaturen werden nicht als Bilder erzeugt. Stattdessen verwendet der Renderer native Tabellen-, Zeilen- und Rahmeninformationen von PHPWord.
 
-Für ODT-Dateien sollte zum Speichern `RulingDocument::saveReferenceSheet()` verwendet werden. PHPWord 1.4 schreibt Zellrahmen beim ODT-Export nicht mit; das Paket ergänzt diese als editierbare ODF-Zellstile nach dem Export. Der DOCX-Export bleibt unverändert.
+Für ODT-Dateien wird das Dokument zunächst mit PHPWord gespeichert und anschließend mit `OdtRulingPatcher::patch()` ergänzt. PHPWord 1.4 schreibt Zellrahmen und exakte Zeilenhöhen beim ODT-Export nicht vollständig mit; der Patcher ergänzt gültige, editierbare ODF-Zell- und Zeilenstile.
+
+```php
+use PfarrTools\RooRuling\PhpWord\OdtRulingPatcher;
+
+$filename = __DIR__.'/ruling.odt';
+IOFactory::createWriter($phpWord, 'ODText')->save($filename);
+OdtRulingPatcher::patch($filename, $preset->definition(), count: 5);
+```
+
+Wenn mehrere Lineaturtabellen in einem ODT enthalten sind, können sie in einem Schritt gepatcht werden:
+
+```php
+OdtRulingPatcher::patchTables(
+    filename: $filename,
+    rulings: [RulingPreset::Grade1->definition(), RulingPreset::Grade2->definition()],
+    counts: [5, 5],
+);
+```
+
+Für die fertigen Referenzseiten des Pakets kann alternativ `RulingDocument::saveReferenceSheet()` verwendet werden. Diese Methode erzeugt jeweils ein vollständiges Dokument für ein Preset.
 
 Dadurch bleiben die Dokumente bearbeitbar und die Lineaturen können mit anderen PHPWord-Inhalten kombiniert werden.
 

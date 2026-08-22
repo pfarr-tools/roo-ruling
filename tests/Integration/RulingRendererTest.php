@@ -35,13 +35,14 @@ final class RulingRendererTest extends TestCase
             $zip = new ZipArchive();
             self::assertSame(true, $zip->open($filename));
             $content = $zip->getFromName('content.xml');
-            $styles = $zip->getFromName('styles.xml');
             $zip->close();
 
             self::assertIsString($content);
-            self::assertIsString($styles);
             self::assertStringContainsString('table:style-name="RooRulingZoneTopLeftRight"', $content);
-            self::assertStringContainsString('border-bottom="0.200pt solid #808080"', $styles);
+            self::assertStringContainsString('table:style-name="RooRulingZoneRow4"', $content);
+            self::assertStringContainsString('border-bottom="0.200pt solid #808080"', $content);
+            self::assertStringContainsString('style:row-height="0.4000cm"', $content);
+            self::assertStringContainsString('style:use-optimal-row-height="false"', $content);
         } finally {
             unlink($filename);
         }
