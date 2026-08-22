@@ -40,5 +40,10 @@ final class RulingDocument
         };
 
         IOFactory::createWriter($this->createReferenceSheet($preset), $writerType)->save($filename);
+
+        if ($extension === 'odt') {
+            $definition = $preset->definition();
+            OdtRulingPatcher::patch($filename, $definition, $preset->referenceGeometry()->bands);
+        }
     }
 }

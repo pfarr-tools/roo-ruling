@@ -171,6 +171,8 @@ Das Paket ist für beide von PHPWord unterstützten Ausgabeformate vorgesehen:
 
 Die Lineaturen werden nicht als Bilder erzeugt. Stattdessen verwendet der Renderer native Tabellen-, Zeilen- und Rahmeninformationen von PHPWord.
 
+Für ODT-Dateien sollte zum Speichern `RulingDocument::saveReferenceSheet()` verwendet werden. PHPWord 1.4 schreibt Zellrahmen beim ODT-Export nicht mit; das Paket ergänzt diese als editierbare ODF-Zellstile nach dem Export. Der DOCX-Export bleibt unverändert.
+
 Dadurch bleiben die Dokumente bearbeitbar und die Lineaturen können mit anderen PHPWord-Inhalten kombiniert werden.
 
 ## Maßeinheiten
@@ -250,4 +252,3 @@ Sie dürfen das Programm unter den Bedingungen der GNU General Public License, w
 Dieses Programm wird in der Hoffnung veröffentlicht, dass es nützlich sein wird, jedoch **ohne jede Gewährleistung**; auch ohne die implizite Gewährleistung der **Marktreife** oder der **Eignung für einen bestimmten Zweck**.
 
 Den vollständigen Lizenztext finden Sie in der Datei [`LICENSE`](LICENSE).
-

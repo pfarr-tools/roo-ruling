@@ -6,8 +6,10 @@ namespace PfarrTools\RooRuling\Tests\Integration;
 
 use PhpOffice\PhpWord\PhpWord;
 use PfarrTools\RooRuling\PhpWord\RulingRenderer;
+use PfarrTools\RooRuling\PhpWord\RulingDocument;
 use PfarrTools\RooRuling\RulingPreset;
 use PHPUnit\Framework\TestCase;
+use ZipArchive;
 
 final class RulingRendererTest extends TestCase
 {
@@ -21,5 +23,27 @@ final class RulingRendererTest extends TestCase
 
         // 3 zone rows + 1 gap + 3 zone rows.
         self::assertCount(7, $table->getRows());
+    }
+
+    public function testOdtReferenceSheetContainsEditableCellBorders(): void
+    {
+        $filename = tempnam(sys_get_temp_dir(), 'roo-ruling-').'.odt';
+
+        try {
+            (new RulingDocument())->saveReferenceSheet(RulingPreset::Grade1, $filename);
+
+            $zip = new ZipArchive();
+            self::assertSame(true, $zip->open($filename));
+            $content = $zip->getFromName('content.xml');
+            $styles = $zip->getFromName('styles.xml');
+            $zip->close();
+
+            self::assertIsString($content);
+            self::assertIsString($styles);
+            self::assertStringContainsString('table:style-name="RooRulingZoneTopLeftRight"', $content);
+            self::assertStringContainsString('border-bottom="0.200pt solid #808080"', $styles);
+        } finally {
+            unlink($filename);
+        }
     }
 }
