@@ -1,0 +1,26 @@
+{
+  "method": "LibreOffice -> PDF -> 300 dpi PNG; horizontal-line pixel detection",
+  "dpi": 300,
+  "pixels_per_mm": 11.811023622,
+  "grade_1": {
+    "source": "deutschlinie1a4.doc",
+    "horizontal_lines": 56,
+    "bands": 14,
+    "repeating_distances_px": [47.0, 58.5, 47.5, 59.5],
+    "interpreted_mm": [4.0, 5.0, 4.0, 5.0]
+  },
+  "grade_2": {
+    "source": "deutschlinie2a4.doc",
+    "horizontal_lines": 80,
+    "bands": 20,
+    "repeating_distances_px": [35.0, 47.0, 35.5, 24.5],
+    "interpreted_mm": [3.0, 4.0, 3.0, 2.0]
+  },
+  "grade_3": {
+    "source": "deutschlinie3a4.doc",
+    "horizontal_lines": 44,
+    "bands": 22,
+    "repeating_distances_px": [45.0, 90.5],
+    "interpreted_mm": [3.8, 7.7]
+  }
+}

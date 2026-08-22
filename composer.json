@@ -1,0 +1,28 @@
+{
+  "name": "pfarr-tools/roo-ruling",
+  "description": "Reusable handwriting rulings for PHPWord documents, including German primary-school Grade 1-3 presets.",
+  "type": "library",
+  "license": "GPL-3.0-or-later",
+  "require": {
+    "php": "^8.3",
+    "phpoffice/phpword": "^1.4"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^11.0 || ^12.0"
+  },
+  "autoload": {
+    "psr-4": {
+      "PfarrTools\\RooRuling\\": "src/"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "PfarrTools\\RooRuling\\Tests\\": "tests/"
+    }
+  },
+  "scripts": {
+    "test": "phpunit"
+  },
+  "minimum-stability": "stable",
+  "prefer-stable": true
+}
