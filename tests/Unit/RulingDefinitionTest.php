@@ -33,9 +33,19 @@ final class RulingDefinitionTest extends TestCase
     {
         $ruling = RulingPreset::Grade3->definition();
 
-        self::assertSame([3.8], $ruling->zonesMm);
-        self::assertSame(7.7, $ruling->gapMm);
-        self::assertEqualsWithDelta(11.5, $ruling->pitchMm(), 0.001);
+        self::assertSame([3.0, 4.0, 3.0], $ruling->zonesMm);
+        self::assertSame(2.0, $ruling->gapMm);
+        self::assertSame(12.0, $ruling->pitchMm());
+        self::assertSame(1, $ruling->textZoneIndex);
+        self::assertSame([1, 2], $ruling->lineIndexes);
+        self::assertFalse($ruling->drawsLine(0));
+        self::assertTrue($ruling->drawsLine(1));
+        self::assertTrue($ruling->drawsLine(2));
+        self::assertFalse($ruling->drawsLine(3));
+        self::assertSame([1], $ruling->sideBorderZoneIndexes);
+        self::assertTrue($ruling->drawsSideBorder(1));
+        self::assertFalse($ruling->drawsSideBorder(0));
+        self::assertFalse($ruling->drawsSideBorder(2));
     }
 
     public function testGrade4PlusGeometry(): void

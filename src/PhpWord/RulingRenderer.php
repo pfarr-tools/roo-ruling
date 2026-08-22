@@ -55,7 +55,7 @@ final class RulingRenderer
 
                 $cell = $row->addCell($widthTwips, $this->zoneCellStyle(
                     ruling: $ruling,
-                    firstZone: $zoneIndex === 0,
+                    zoneIndex: $zoneIndex,
                 ));
 
                 if ($zoneIndex === $ruling->textZoneIndex && array_key_exists($band, $textByBand)) {
@@ -87,24 +87,26 @@ final class RulingRenderer
     }
 
     /** @return array<string, int|string> */
-    private function zoneCellStyle(RulingDefinition $ruling, bool $firstZone): array
+    private function zoneCellStyle(RulingDefinition $ruling, int $zoneIndex): array
     {
-        $style = [
-            'borderBottomSize' => $ruling->lineSize,
-            'borderBottomColor' => $ruling->lineColor,
-        ];
+        $style = [];
 
-        if ($firstZone && $ruling->topBorder) {
+        if ($ruling->drawsLine($zoneIndex) && ($zoneIndex > 0 || $ruling->topBorder)) {
             $style['borderTopSize'] = $ruling->lineSize;
             $style['borderTopColor'] = $ruling->lineColor;
         }
 
-        if ($ruling->leftBorder) {
+        if ($ruling->drawsLine($zoneIndex + 1)) {
+            $style['borderBottomSize'] = $ruling->lineSize;
+            $style['borderBottomColor'] = $ruling->lineColor;
+        }
+
+        if ($ruling->drawsSideBorder($zoneIndex) && $ruling->leftBorder) {
             $style['borderLeftSize'] = $ruling->lineSize;
             $style['borderLeftColor'] = $ruling->lineColor;
         }
 
-        if ($ruling->rightBorder) {
+        if ($ruling->drawsSideBorder($zoneIndex) && $ruling->rightBorder) {
             $style['borderRightSize'] = $ruling->lineSize;
             $style['borderRightColor'] = $ruling->lineColor;
         }

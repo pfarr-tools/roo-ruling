@@ -20,7 +20,10 @@
     "source": "deutschlinie3a4.doc",
     "horizontal_lines": 44,
     "bands": 22,
-    "repeating_distances_px": [45.0, 90.5],
-    "interpreted_mm": [3.8, 7.7]
+    "repeating_distances_px": [47.0, 94.0],
+    "interpreted_mm": [4.0, 8.0],
+    "underlying_zones_mm": [3.0, 4.0, 3.0],
+    "gap_mm": 2.0,
+    "visible_line_indexes": [1, 2]
   }
 }

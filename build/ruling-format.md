@@ -44,12 +44,12 @@ Reference sheet: 20 bands (80 horizontal lines).
 
 ### Grade 3
 
-Each band has only a top and bottom line. Repeating distances are approximately:
+Grade 3 uses the same 3 / 4 / 3 mm zones and 2 mm inter-band gap as Grade 2. Only the two horizontal lines enclosing the middle 4 mm zone are drawn. The visible repeating distances are therefore:
 
-- 45 px = 3.81 mm inside the writing band
-- 90.5 px = 7.66 mm to the next band
+- approximately 47 px = 4.0 mm inside the writing band
+- approximately 94 px = 8.0 mm to the next visible line
 
-The package therefore uses **3.8 mm** for the writing band and **7.7 mm** for the gap.
+The package therefore uses **3 / 4 / 3 mm** zones and a **2 mm** gap, with only horizontal line indexes **1** and **2** enabled (the boundaries of the middle zone).
 
 Reference sheet: 22 bands (44 horizontal lines).
 
@@ -80,7 +80,7 @@ The renderer creates one table. Each writing zone becomes an exact-height row. T
 
 ## Text placement
 
-Grade 1 and 2 designate the middle zone as the initial text zone; Grade 3 uses its only zone. This is sufficient for ordinary typed prompts but is not yet a full handwriting-baseline engine. A future refinement may render sample glyphs across multiple zones so ascenders and descenders can cross zone boundaries naturally.
+Grade 1, 2, and 3 designate the middle zone as the initial text zone. This is sufficient for ordinary typed prompts but is not yet a full handwriting-baseline engine. A future refinement may render sample glyphs across multiple zones so ascenders and descenders can cross zone boundaries naturally.
 
 ## Output formats
 

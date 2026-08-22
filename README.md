@@ -62,12 +62,13 @@ Die Lineatur verwendet ebenfalls vier Linien, ist aber kleiner:
 
 ### Klasse 3
 
-Ab Klasse 3 entfällt die Unterteilung in Ober-, Mittel- und Unterbereich.
+Klasse 3 verwendet dieselben Maße wie Klasse 2, aber es werden nur die beiden Linien gezeichnet, die den mittleren Schreibbereich einschließen:
 
-Die Lineatur besteht aus einem einfachen Schreibbereich:
-
-* Höhe des Schreibbereichs: ca. 3,8 mm
-* Abstand zum nächsten Schreibbereich: ca. 7,7 mm
+* oberer Bereich: 3 mm, ohne Linie
+* mittlerer Bereich: 4 mm, obere und untere Linie
+* unterer Bereich: 3 mm, ohne Linie
+* Abstand zur nächsten Lineatur: 2 mm
+* seitliche Begrenzungslinien nur am mittleren Bereich
 
 ### Klasse 4 und höher
 

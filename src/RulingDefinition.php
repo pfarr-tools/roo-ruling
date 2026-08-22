@@ -10,6 +10,8 @@ final readonly class RulingDefinition
 {
     /**
      * @param non-empty-list<float> $zonesMm Heights between the horizontal ruling lines.
+     * @param list<int> $lineIndexes Horizontal lines to draw, numbered from 0 at the top.
+     * @param list<int> $sideBorderZoneIndexes Zones receiving left/right borders.
      */
     public function __construct(
         public array $zonesMm,
@@ -20,6 +22,8 @@ final readonly class RulingDefinition
         public string $lineColor = '808080',
         public int $lineSize = 4,
         public int $textZoneIndex = 0,
+        public array $lineIndexes = [],
+        public array $sideBorderZoneIndexes = [],
     ) {
         if ($this->zonesMm === []) {
             throw new InvalidArgumentException('A ruling needs at least one zone.');
@@ -42,6 +46,28 @@ final readonly class RulingDefinition
         if ($this->textZoneIndex < 0 || $this->textZoneIndex >= count($this->zonesMm)) {
             throw new InvalidArgumentException('Text zone index is outside the available zones.');
         }
+
+        foreach ($this->lineIndexes as $lineIndex) {
+            if ($lineIndex < 0 || $lineIndex > count($this->zonesMm)) {
+                throw new InvalidArgumentException('A line index is outside the available horizontal lines.');
+            }
+        }
+
+        foreach ($this->sideBorderZoneIndexes as $zoneIndex) {
+            if ($zoneIndex < 0 || $zoneIndex >= count($this->zonesMm)) {
+                throw new InvalidArgumentException('A side-border zone index is outside the available zones.');
+            }
+        }
+    }
+
+    public function drawsLine(int $lineIndex): bool
+    {
+        return $this->lineIndexes === [] || in_array($lineIndex, $this->lineIndexes, true);
+    }
+
+    public function drawsSideBorder(int $zoneIndex): bool
+    {
+        return $this->sideBorderZoneIndexes === [] || in_array($zoneIndex, $this->sideBorderZoneIndexes, true);
     }
 
     public function bandHeightMm(): float

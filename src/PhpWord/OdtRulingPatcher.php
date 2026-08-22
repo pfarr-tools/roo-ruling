@@ -94,7 +94,6 @@ final class OdtRulingPatcher
         foreach ($rows as $rowIndex => $row) {
             $bandRow = $rowIndex % (count($ruling->zonesMm) + ($ruling->gapMm > 0 ? 1 : 0));
             $isGap = $ruling->gapMm > 0 && $bandRow === count($ruling->zonesMm);
-            $firstZone = $bandRow === 0;
             $heightMm = $isGap ? $ruling->gapMm : $ruling->zonesMm[$bandRow];
 
             $rowStyleName = $prefix.($isGap ? 'GapRow' : 'ZoneRow').str_replace('.', '_', (string) $heightMm);
@@ -113,19 +112,25 @@ final class OdtRulingPatcher
                     continue;
                 }
 
+                $drawTop = !$isGap && $ruling->drawsLine($bandRow) && ($bandRow > 0 || $ruling->topBorder);
+                $drawBottom = !$isGap && $ruling->drawsLine($bandRow + 1);
                 $styleName = $prefix.($isGap ? 'Gap' : 'Zone');
-                if ($firstZone && $ruling->topBorder) {
+                if ($drawTop) {
                     $styleName .= 'Top';
                 }
-                if ($ruling->leftBorder) {
+                if (!$drawBottom) {
+                    $styleName .= 'NoBottom';
+                }
+                $drawSide = $ruling->drawsSideBorder($bandRow);
+                if ($drawSide && $ruling->leftBorder) {
                     $styleName .= 'Left';
                 }
-                if ($ruling->rightBorder) {
+                if ($drawSide && $ruling->rightBorder) {
                     $styleName .= 'Right';
                 }
                 if (!isset($styleNames[$styleName])) {
                     $styleNames[$styleName] = true;
-                    self::appendStyle($content, $automaticStyles, $styleName, $ruling, $isGap, $firstZone);
+                    self::appendStyle($content, $automaticStyles, $styleName, $ruling, $drawTop, $drawBottom, $drawSide);
                 }
                 $cell->setAttributeNS(
                     'urn:oasis:names:tc:opendocument:xmlns:table:1.0',
@@ -150,8 +155,9 @@ final class OdtRulingPatcher
         DOMElement $automaticStyles,
         string $name,
         RulingDefinition $ruling,
-        bool $isGap,
-        bool $firstZone,
+        bool $drawTop,
+        bool $drawBottom,
+        bool $drawSide,
     ): void {
         $style = $document->createElementNS('urn:oasis:names:tc:opendocument:xmlns:style:1.0', 'style:style');
         $style->setAttribute('style:name', $name);
@@ -161,17 +167,19 @@ final class OdtRulingPatcher
             'style:table-cell-properties',
         );
 
-        if (!$isGap) {
+        if ($drawTop || $drawBottom) {
             $border = number_format($ruling->lineSize / 20, 3, '.', '').'pt solid #'.$ruling->lineColor;
             $foNamespace = 'urn:oasis:names:tc:opendocument:xmlns:xsl-fo-compatible:1.0';
-            $properties->setAttributeNS($foNamespace, 'fo:border-bottom', $border);
-            if ($firstZone && $ruling->topBorder) {
+            if ($drawBottom) {
+                $properties->setAttributeNS($foNamespace, 'fo:border-bottom', $border);
+            }
+            if ($drawTop) {
                 $properties->setAttributeNS($foNamespace, 'fo:border-top', $border);
             }
-            if ($ruling->leftBorder) {
+            if ($drawSide && $ruling->leftBorder) {
                 $properties->setAttributeNS($foNamespace, 'fo:border-left', $border);
             }
-            if ($ruling->rightBorder) {
+            if ($drawSide && $ruling->rightBorder) {
                 $properties->setAttributeNS($foNamespace, 'fo:border-right', $border);
             }
         }

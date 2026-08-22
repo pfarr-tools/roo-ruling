@@ -25,9 +25,11 @@ enum RulingPreset: string
                 textZoneIndex: 1,
             ),
             self::Grade3 => new RulingDefinition(
-                zonesMm: [3.8],
-                gapMm: 7.7,
-                textZoneIndex: 0,
+                zonesMm: [3.0, 4.0, 3.0],
+                gapMm: 2.0,
+                textZoneIndex: 1,
+                lineIndexes: [1, 2],
+                sideBorderZoneIndexes: [1],
             ),
             self::Grade4Plus => new RulingDefinition(
                 zonesMm: [10.0],
