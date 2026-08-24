@@ -30,6 +30,30 @@ final class RulingDocument
         return $phpWord;
     }
 
+    public function createDrawingReferenceSheet(): PhpWord
+    {
+        $phpWord = new PhpWord();
+        $phpWord->getDocInfo()
+            ->setCreator('pfarr-tools/roo-ruling')
+            ->setTitle('Handwriting rulings with drawing elements');
+
+        foreach (RulingPreset::cases() as $preset) {
+            $section = (new ReferencePageFactory())->create($phpWord, $preset);
+            $geometry = $preset->referenceGeometry();
+
+            (new DrawingRulingRenderer())->render(
+                section: $section,
+                ruling: $preset->definition(),
+                leftMm: $geometry->leftMm,
+                topMm: $geometry->topMm,
+                widthMm: $geometry->widthMm,
+                count: $geometry->bands,
+            );
+        }
+
+        return $phpWord;
+    }
+
     public function saveReferenceSheet(RulingPreset $preset, string $filename): void
     {
         $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
@@ -44,6 +68,27 @@ final class RulingDocument
         if ($extension === 'odt') {
             $definition = $preset->definition();
             OdtRulingPatcher::patch($filename, $definition, $preset->referenceGeometry()->bands);
+        }
+    }
+
+    public function saveDrawingReferenceSheet(string $filename): void
+    {
+        $extension = strtolower(pathinfo($filename, PATHINFO_EXTENSION));
+        if (!in_array($extension, ['docx', 'odt'], true)) {
+            throw new \InvalidArgumentException('Only .docx and .odt are supported.');
+        }
+
+        IOFactory::createWriter(
+            $this->createDrawingReferenceSheet(),
+            $extension === 'docx' ? 'Word2007' : 'ODText',
+        )->save($filename);
+
+        if ($extension === 'odt') {
+            OdtDrawingRulingPatcher::patchReferenceSheet(
+                filename: $filename,
+                rulings: array_map(static fn (RulingPreset $preset): \PfarrTools\RooRuling\RulingDefinition => $preset->definition(), RulingPreset::cases()),
+                geometries: array_map(static fn (RulingPreset $preset): \PfarrTools\RooRuling\ReferenceGeometry => $preset->referenceGeometry(), RulingPreset::cases()),
+            );
         }
     }
 }

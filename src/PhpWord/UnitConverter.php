@@ -18,4 +18,9 @@ final class UnitConverter
     {
         return $twips / self::TWIPS_PER_INCH * self::MM_PER_INCH;
     }
+
+    public static function mmToPoints(float $mm): float
+    {
+        return $mm / self::MM_PER_INCH * 72.0;
+    }
 }

@@ -47,4 +47,27 @@ final class RulingRendererTest extends TestCase
             unlink($filename);
         }
     }
+
+    public function testDrawingReferenceSheetOdtContainsAllFourRulingTypes(): void
+    {
+        $filename = tempnam(sys_get_temp_dir(), 'roo-drawing-ruling-').'.odt';
+
+        try {
+            (new RulingDocument())->saveDrawingReferenceSheet($filename);
+
+            $zip = new ZipArchive();
+            self::assertSame(true, $zip->open($filename));
+            $content = $zip->getFromName('content.xml');
+            $zip->close();
+
+            self::assertIsString($content);
+            self::assertSame(453, substr_count($content, '<draw:line'));
+            self::assertSame(4, substr_count($content, 'style:name="RooDrawingLine'));
+            self::assertStringContainsString('svg:y1="0.3000cm"', $content);
+            self::assertStringContainsString('svg:stroke-color="#808080"', $content);
+            self::assertStringContainsString('svg:stroke-width="0.500pt"', $content);
+        } finally {
+            unlink($filename);
+        }
+    }
 }

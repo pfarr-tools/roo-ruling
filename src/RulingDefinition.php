@@ -79,4 +79,18 @@ final readonly class RulingDefinition
     {
         return $this->bandHeightMm() + $this->gapMm;
     }
+
+    /**
+     * Return the total height of a rendered number of writing bands in millimetres.
+     *
+     * Gaps are included only between bands, matching the renderer's output.
+     */
+    public function heightMm(int $count): float
+    {
+        if ($count < 1) {
+            throw new InvalidArgumentException('Count must be at least 1.');
+        }
+
+        return ($count * $this->bandHeightMm()) + (($count - 1) * $this->gapMm);
+    }
 }

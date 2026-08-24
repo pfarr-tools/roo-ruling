@@ -4,6 +4,7 @@ declare(strict_types=1);
 
 namespace PfarrTools\RooRuling\Tests\Unit;
 
+use InvalidArgumentException;
 use PfarrTools\RooRuling\RulingPreset;
 use PHPUnit\Framework\TestCase;
 
@@ -58,5 +59,26 @@ final class RulingDefinitionTest extends TestCase
         self::assertFalse($ruling->leftBorder);
         self::assertFalse($ruling->rightBorder);
         self::assertFalse($ruling->topBorder);
+    }
+
+    public function testHeightForNumberOfBandsIncludesGapsBetweenBands(): void
+    {
+        $ruling = RulingPreset::Grade1->definition();
+
+        self::assertSame(31.0, $ruling->heightMm(2));
+    }
+
+    public function testHeightForNumberOfBandsDoesNotAddGapAfterLastBand(): void
+    {
+        $ruling = RulingPreset::Grade4Plus->definition();
+
+        self::assertSame(30.0, $ruling->heightMm(3));
+    }
+
+    public function testHeightRequiresAtLeastOneBand(): void
+    {
+        $this->expectException(InvalidArgumentException::class);
+
+        RulingPreset::Grade1->definition()->heightMm(0);
     }
 }

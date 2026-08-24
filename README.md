@@ -114,6 +114,32 @@ $preset = RulingPreset::Grade1;
 IOFactory::createWriter($phpWord, 'Word2007')->save(__DIR__.'/ruling.docx');
 ```
 
+Für Lineaturen aus einzelnen, frei positionierbaren PHPWord-Zeichenelementen
+steht `DrawingRulingRenderer` zur Verfügung. Die Koordinaten werden vom
+Seitenrand oben links aus in Millimetern angegeben:
+
+```php
+use PfarrTools\RooRuling\PhpWord\DrawingRulingRenderer;
+
+(new DrawingRulingRenderer())->render(
+    section: $section,
+    ruling: RulingPreset::Grade3->definition(),
+    leftMm: 19.9,
+    topMm: 25.7,
+    widthMm: 171.0,
+    count: 22,
+);
+```
+
+Der Renderer verwendet native PHPWord-Linienelemente mit derselben
+Linienfarbe und -stärke wie der Tabellenrenderer. Die Zonen und Abstände der
+Definition bleiben unverändert; bei Klasse 3 liegt die erste sichtbare Linie
+deshalb erst 3 mm unterhalb der angegebenen oberen Koordinate.
+
+Für ODT wird die von PHPWord geschriebene Datei anschließend um native
+ODF-`draw:line`-Elemente und deren Grafikstile ergänzt. Dadurch bleiben die
+Linien auch dort als Zeichenelemente bearbeitbar.
+
 `widthMm` und alle Maße der Definition werden in Millimetern angegeben. Die vier verfügbaren Presets sind:
 
 ```php
@@ -122,6 +148,19 @@ RulingPreset::Grade2;
 RulingPreset::Grade3;
 RulingPreset::Grade4Plus;
 ```
+
+### Höhe einer Lineatur berechnen
+
+Mit `heightMm()` lässt sich die Gesamthöhe einer gerenderten Lineatur in
+Millimetern berechnen. Der Abstand zwischen zwei Schreibbereichen wird dabei
+nur zwischen den Bereichen berücksichtigt, nicht hinter dem letzten Bereich:
+
+```php
+$heightMm = RulingPreset::Grade1->definition()->heightMm(5);
+// 5 * 13 mm Schreibbereiche + 4 * 5 mm Zwischenräume = 85 mm
+```
+
+Die Anzahl muss mindestens `1` betragen.
 
 ## Text auf der Lineatur
 
@@ -219,6 +258,10 @@ Nach der Installation der Composer-Abhängigkeiten können damit DOCX- und ODT-D
 composer install
 php examples/generate.php
 ```
+
+Das Skript erzeugt zusätzlich `examples/output/drawing-rulings.docx` und
+`examples/output/drawing-rulings.odt` mit allen vier Lineaturtypen als
+Zeichenelemente.
 
 Diese Dokumente können anschließend beispielsweise mit Microsoft Word oder LibreOffice geöffnet und mit den ursprünglichen Vorlagen verglichen werden.
 

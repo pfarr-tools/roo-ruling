@@ -21,3 +21,9 @@ foreach (RulingPreset::cases() as $preset) {
         fwrite(STDOUT, "Wrote {$path}\n");
     }
 }
+
+foreach (['docx', 'odt'] as $extension) {
+    $drawingPath = $output.'/drawing-rulings.'.$extension;
+    $document->saveDrawingReferenceSheet($drawingPath);
+    fwrite(STDOUT, "Wrote {$drawingPath}\n");
+}
