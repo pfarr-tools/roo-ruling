@@ -12,7 +12,11 @@ composer require pfarr-tools/roo-ruling
 
 Voraussetzung ist PHP 8.3 oder neuer.
 
-Das Paket verwendet `phpoffice/phpword` zur Dokumentenerzeugung.
+Das Paket verwendet derzeit eine temporäre Abspaltung von `phpoffice/phpword`:
+den Branch `new-features-and-fixes` aus
+[`potofcoffee/PHPWord`](https://github.com/potofcoffee/PHPWord/tree/new-features-and-fixes).
+Die darin enthaltenen PHPWord-Fixes warten noch auf die Freigabe und Übernahme
+im PHPWord-Hauptprojekt.
 
 ## Unterstützte Lineaturen
 
@@ -136,9 +140,9 @@ Linienfarbe und -stärke wie der Tabellenrenderer. Die Zonen und Abstände der
 Definition bleiben unverändert; bei Klasse 3 liegt die erste sichtbare Linie
 deshalb erst 3 mm unterhalb der angegebenen oberen Koordinate.
 
-Für ODT wird die von PHPWord geschriebene Datei anschließend um native
-ODF-`draw:line`-Elemente und deren Grafikstile ergänzt. Dadurch bleiben die
-Linien auch dort als Zeichenelemente bearbeitbar.
+Für ODT schreibt dieser PHPWord-Branch native ODF-`draw:line`-Elemente und
+deren Grafikstile direkt. Dadurch bleiben die Linien auch dort als
+Zeichenelemente bearbeitbar.
 
 `widthMm` und alle Maße der Definition werden in Millimetern angegeben. Die vier verfügbaren Presets sind:
 
@@ -195,24 +199,13 @@ Das Paket ist für beide von PHPWord unterstützten Ausgabeformate vorgesehen:
 
 Die Lineaturen werden nicht als Bilder erzeugt. Stattdessen verwendet der Renderer native Tabellen-, Zeilen- und Rahmeninformationen von PHPWord.
 
-Für ODT-Dateien wird das Dokument zunächst mit PHPWord gespeichert und anschließend mit `OdtRulingPatcher::patch()` ergänzt. PHPWord 1.4 schreibt Zellrahmen und exakte Zeilenhöhen beim ODT-Export nicht vollständig mit; der Patcher ergänzt gültige, editierbare ODF-Zell- und Zeilenstile.
+Der temporäre PHPWord-Branch schreibt die Zellrahmen, exakten Zeilenhöhen und
+Zeichenelemente direkt als editierbare ODF-Strukturen. Ein zusätzlicher
+Post-Export-Patcher ist für die Produktions-Renderer daher nicht erforderlich.
 
 ```php
-use PfarrTools\RooRuling\PhpWord\OdtRulingPatcher;
-
 $filename = __DIR__.'/ruling.odt';
 IOFactory::createWriter($phpWord, 'ODText')->save($filename);
-OdtRulingPatcher::patch($filename, $preset->definition(), count: 5);
-```
-
-Wenn mehrere Lineaturtabellen in einem ODT enthalten sind, können sie in einem Schritt gepatcht werden:
-
-```php
-OdtRulingPatcher::patchTables(
-    filename: $filename,
-    rulings: [RulingPreset::Grade1->definition(), RulingPreset::Grade2->definition()],
-    counts: [5, 5],
-);
 ```
 
 Für die fertigen Referenzseiten des Pakets kann alternativ `RulingDocument::saveReferenceSheet()` verwendet werden. Diese Methode erzeugt jeweils ein vollständiges Dokument für ein Preset.

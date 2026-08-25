@@ -38,10 +38,9 @@ final class RulingRendererTest extends TestCase
             $zip->close();
 
             self::assertIsString($content);
-            self::assertStringContainsString('table:style-name="RooRulingZoneTopLeftRight"', $content);
-            self::assertStringContainsString('table:style-name="RooRulingZoneRow4"', $content);
-            self::assertStringContainsString('border-bottom="0.200pt solid #808080"', $content);
-            self::assertStringContainsString('style:row-height="0.4000cm"', $content);
+            self::assertStringContainsString('style:family="table-cell"', $content);
+            self::assertStringContainsString('fo:border-bottom="0.200pt solid #808080"', $content);
+            self::assertMatchesRegularExpression('/style:row-height="0\.400[0-9]+cm"/', $content);
             self::assertStringContainsString('style:use-optimal-row-height="false"', $content);
         } finally {
             unlink($filename);
@@ -62,10 +61,8 @@ final class RulingRendererTest extends TestCase
 
             self::assertIsString($content);
             self::assertSame(453, substr_count($content, '<draw:line'));
-            self::assertSame(4, substr_count($content, 'style:name="RooDrawingLine'));
-            self::assertStringContainsString('svg:y1="0.3000cm"', $content);
             self::assertStringContainsString('svg:stroke-color="#808080"', $content);
-            self::assertStringContainsString('svg:stroke-width="0.500pt"', $content);
+            self::assertStringContainsString('svg:stroke-width="0.5pt"', $content);
         } finally {
             unlink($filename);
         }

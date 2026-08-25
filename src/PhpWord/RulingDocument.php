@@ -64,11 +64,6 @@ final class RulingDocument
         };
 
         IOFactory::createWriter($this->createReferenceSheet($preset), $writerType)->save($filename);
-
-        if ($extension === 'odt') {
-            $definition = $preset->definition();
-            OdtRulingPatcher::patch($filename, $definition, $preset->referenceGeometry()->bands);
-        }
     }
 
     public function saveDrawingReferenceSheet(string $filename): void
@@ -82,13 +77,5 @@ final class RulingDocument
             $this->createDrawingReferenceSheet(),
             $extension === 'docx' ? 'Word2007' : 'ODText',
         )->save($filename);
-
-        if ($extension === 'odt') {
-            OdtDrawingRulingPatcher::patchReferenceSheet(
-                filename: $filename,
-                rulings: array_map(static fn (RulingPreset $preset): \PfarrTools\RooRuling\RulingDefinition => $preset->definition(), RulingPreset::cases()),
-                geometries: array_map(static fn (RulingPreset $preset): \PfarrTools\RooRuling\ReferenceGeometry => $preset->referenceGeometry(), RulingPreset::cases()),
-            );
-        }
     }
 }
