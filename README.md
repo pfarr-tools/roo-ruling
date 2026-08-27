@@ -4,6 +4,31 @@
 
 Das Paket bildet insbesondere die in der Grundschule verwendeten Schreiblineaturen ab und kann sie sowohl in **DOCX-** als auch in **ODT-Dokumenten** erzeugen.
 
+## Schreibraum für Antworten schätzen
+
+`HandwritingSpaceEstimator` schätzt, wie viel horizontale Fläche eine
+Schülerin oder ein Schüler für eine erwartete handschriftliche Antwort
+benötigt. Die Heuristik verwendet je nach Klassenstufe durchschnittliche
+Zeichenbreiten von 7,0 mm (Klasse 1), 6,5 mm (Klasse 2), 5,5 mm (Klasse 3),
+5,0 mm (Klasse 4) und 4,5 mm (ab Klasse 5). Die drei Flexibilitätsstufen
+`EXACT`, `SHORT_TEXT` und `FREE_TEXT` berücksichtigen zunehmend variierende
+Antwortformulierungen.
+
+```php
+use PfarrTools\RooRuling\AnswerFlexibility;
+use PfarrTools\RooRuling\HandwritingSpaceEstimator;
+
+$widthMm = (new HandwritingSpaceEstimator())->estimateWidthMm(
+    answer: 'im Himmel',
+    grade: 2,
+    flexibility: AnswerFlexibility::EXACT,
+);
+```
+
+Das Ergebnis enthält 4 mm festen Rand und wird immer auf die nächsten 5 mm
+aufgerundet. Es handelt sich um eine großzügige Arbeitsblatt-Heuristik, nicht
+um eine typografische Messung der tatsächlich gerenderten Schrift.
+
 ## Installation
 
 ```bash
