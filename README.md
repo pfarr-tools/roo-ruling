@@ -4,31 +4,6 @@
 
 Das Paket bildet insbesondere die in der Grundschule verwendeten Schreiblineaturen ab und kann sie sowohl in **DOCX-** als auch in **ODT-Dokumenten** erzeugen.
 
-## Schreibraum für Antworten schätzen
-
-`HandwritingSpaceEstimator` schätzt, wie viel horizontale Fläche eine
-Schülerin oder ein Schüler für eine erwartete handschriftliche Antwort
-benötigt. Die Heuristik verwendet je nach Klassenstufe durchschnittliche
-Zeichenbreiten von 7,0 mm (Klasse 1), 6,5 mm (Klasse 2), 5,5 mm (Klasse 3),
-5,0 mm (Klasse 4) und 4,5 mm (ab Klasse 5). Die drei Flexibilitätsstufen
-`EXACT`, `SHORT_TEXT` und `FREE_TEXT` berücksichtigen zunehmend variierende
-Antwortformulierungen.
-
-```php
-use PfarrTools\RooRuling\AnswerFlexibility;
-use PfarrTools\RooRuling\HandwritingSpaceEstimator;
-
-$widthMm = (new HandwritingSpaceEstimator())->estimateWidthMm(
-    answer: 'im Himmel',
-    grade: 2,
-    flexibility: AnswerFlexibility::EXACT,
-);
-```
-
-Das Ergebnis enthält 4 mm festen Rand und wird immer auf die nächsten 5 mm
-aufgerundet. Es handelt sich um eine großzügige Arbeitsblatt-Heuristik, nicht
-um eine typografische Messung der tatsächlich gerenderten Schrift.
-
 ## Installation
 
 ```bash
@@ -42,6 +17,58 @@ den Branch `new-features-and-fixes` aus
 [`potofcoffee/PHPWord`](https://github.com/potofcoffee/PHPWord/tree/new-features-and-fixes).
 Die darin enthaltenen PHPWord-Fixes warten noch auf die Freigabe und Übernahme
 im PHPWord-Hauptprojekt.
+
+## Schnellstart
+
+Für eine PHPWord-Lineatur wird ein Preset als `RulingDefinition` an den
+Renderer übergeben:
+
+```php
+use PhpOffice\PhpWord\IOFactory;
+use PhpOffice\PhpWord\PhpWord;
+use PfarrTools\RooRuling\PhpWord\RulingRenderer;
+use PfarrTools\RooRuling\RulingPreset;
+
+$phpWord = new PhpWord();
+$section = $phpWord->addSection();
+
+(new RulingRenderer())->render(
+    section: $section,
+    ruling: RulingPreset::Grade1->definition(),
+    count: 5,
+    widthMm: 170.0,
+);
+
+IOFactory::createWriter($phpWord, 'Word2007')->save(__DIR__.'/ruling.docx');
+```
+
+## PNG-Ausgabe
+
+`PngRulingRenderer` erzeugt ein einzelnes Lineaturband als PNG mit
+transparentem Hintergrund. Die Breite wird in Millimetern angegeben; die Höhe
+ergibt sich aus der gewählten `RulingDefinition`. Die Ausgabe verwendet die
+Geometrie, Linienfarbe und Linienstärke der Definition und ist damit auch für
+`RulingPreset::Grade1` bis `RulingPreset::Grade4Plus` geeignet.
+
+Für die PNG-Ausgabe wird die PHP-Erweiterung GD benötigt:
+
+```php
+use PfarrTools\RooRuling\Image\PngRulingRenderer;
+use PfarrTools\RooRuling\RulingPreset;
+
+$png = (new PngRulingRenderer())->render(
+    ruling: RulingPreset::Grade2->definition(),
+    widthMm: 120.0,
+    dpi: 300,
+);
+
+file_put_contents(__DIR__.'/ruling-grade-2.png', $png);
+```
+
+`dpi` ist optional und beträgt standardmäßig 300. Ein positiver Wert für
+`widthMm` ist erforderlich. Diese Rasterausgabe ist für Vorschauen,
+Arbeitsblätter oder Bildkompositionen gedacht; die PHPWord-Ausgabe bleibt der
+bearbeitbare Dokumentpfad.
 
 ## Unterstützte Lineaturen
 
@@ -119,29 +146,10 @@ Text steht auf dieser Linie
 ──────────────────────────────
 ```
 
-## Verwendung
+## PHPWord-Verwendung
 
-In einem eigenen Projekt wird zunächst ein PHPWord-Abschnitt angelegt. Ein Preset liefert die Geometrie als `RulingDefinition`; der Renderer fügt daraus eine native Tabelle mit exakten Zeilenhöhen und Rahmenlinien ein.
-
-```php
-use PhpOffice\PhpWord\IOFactory;
-use PhpOffice\PhpWord\PhpWord;
-use PfarrTools\RooRuling\RulingPreset;
-use PfarrTools\RooRuling\PhpWord\RulingRenderer;
-
-$phpWord = new PhpWord();
-$section = $phpWord->addSection();
-
-$preset = RulingPreset::Grade1;
-(new RulingRenderer())->render(
-    section: $section,
-    ruling: $preset->definition(),
-    count: 5,
-    widthMm: 170.0,
-);
-
-IOFactory::createWriter($phpWord, 'Word2007')->save(__DIR__.'/ruling.docx');
-```
+Ein Preset liefert die Geometrie als `RulingDefinition`; der Renderer fügt
+daraus eine native Tabelle mit exakten Zeilenhöhen und Rahmenlinien ein.
 
 Für Lineaturen aus einzelnen, frei positionierbaren PHPWord-Zeichenelementen
 steht `DrawingRulingRenderer` zur Verfügung. Die Koordinaten werden vom
@@ -222,7 +230,9 @@ Das Paket ist für beide von PHPWord unterstützten Ausgabeformate vorgesehen:
 * Microsoft Word (`.docx`)
 * OpenDocument Text (`.odt`)
 
-Die Lineaturen werden nicht als Bilder erzeugt. Stattdessen verwendet der Renderer native Tabellen-, Zeilen- und Rahmeninformationen von PHPWord.
+Für den PHPWord-Produktionspfad werden Lineaturen nicht als Bilder erzeugt.
+Stattdessen verwendet der Renderer native Tabellen-, Zeilen- und
+Rahmeninformationen von PHPWord.
 
 Der temporäre PHPWord-Branch schreibt die Zellrahmen, exakten Zeilenhöhen und
 Zeichenelemente direkt als editierbare ODF-Strukturen. Ein zusätzlicher
@@ -236,6 +246,31 @@ IOFactory::createWriter($phpWord, 'ODText')->save($filename);
 Für die fertigen Referenzseiten des Pakets kann alternativ `RulingDocument::saveReferenceSheet()` verwendet werden. Diese Methode erzeugt jeweils ein vollständiges Dokument für ein Preset.
 
 Dadurch bleiben die Dokumente bearbeitbar und die Lineaturen können mit anderen PHPWord-Inhalten kombiniert werden.
+
+## Schreibraum für Antworten schätzen
+
+`HandwritingSpaceEstimator` schätzt, wie viel horizontale Fläche eine
+Schülerin oder ein Schüler für eine erwartete handschriftliche Antwort
+benötigt. Die Heuristik verwendet je nach Klassenstufe durchschnittliche
+Zeichenbreiten von 7,0 mm (Klasse 1), 6,5 mm (Klasse 2), 5,5 mm (Klasse 3),
+5,0 mm (Klasse 4) und 4,5 mm (ab Klasse 5). Die drei Flexibilitätsstufen
+`EXACT`, `SHORT_TEXT` und `FREE_TEXT` berücksichtigen zunehmend variierende
+Antwortformulierungen.
+
+```php
+use PfarrTools\RooRuling\AnswerFlexibility;
+use PfarrTools\RooRuling\HandwritingSpaceEstimator;
+
+$widthMm = (new HandwritingSpaceEstimator())->estimateWidthMm(
+    answer: 'im Himmel',
+    grade: 2,
+    flexibility: AnswerFlexibility::EXACT,
+);
+```
+
+Das Ergebnis enthält 4 mm festen Rand und wird immer auf die nächsten 5 mm
+aufgerundet. Es handelt sich um eine großzügige Arbeitsblatt-Heuristik, nicht
+um eine typografische Messung der tatsächlich gerenderten Schrift.
 
 ## Maßeinheiten
 
